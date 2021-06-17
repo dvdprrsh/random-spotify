@@ -1,19 +1,46 @@
 {
-  "name": "random-spotify",
-  "version": "1.0.0",
-  "description": "random-spotify",
-  "main": "index.ts",
+  "name": "my-razzle-app",
+  "version": "4.0.4",
+  "license": "MIT",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prestart": "rimraf build cache",
+    "start": "razzle start",
+    "build": "razzle build",
+    "test": "razzle test --env=jsdom",
+    "start:prod": "NODE_ENV=production node build/server.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/dvprrsh/random-spotify.git"
+  "dependencies": {
+    "axios": "^0.21.1",
+    "fastify": "^3.18.0",
+    "fastify-static": "^4.2.2",
+    "middie": "^5.2.0",
+    "pino-pretty": "^5.0.2",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "^6.0.0-beta.0"
   },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/dvprrsh/random-spotify/issues"
-  },
-  "homepage": "https://github.com/dvprrsh/random-spotify#readme"
+  "devDependencies": {
+    "@babel/preset-env": "^7.14.5",
+    "@babel/preset-typescript": "^7.14.5",
+    "@types/node": "^15.12.2",
+    "@types/react": "^17.0.11",
+    "@types/react-dom": "^17.0.7",
+    "@types/webpack-env": "^1.16.0",
+    "@typescript-eslint/eslint-plugin": "^4.27.0",
+    "@typescript-eslint/parser": "^4.27.0",
+    "babel-preset-razzle": "4.0.4",
+    "eslint": "^7.28.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-react": "^7.24.0",
+    "fastify-sensible": "^3.1.1",
+    "html-webpack-plugin": "^4.5.2",
+    "mini-css-extract-plugin": "^0.9.0",
+    "razzle": "4.0.4",
+    "razzle-dev-utils": "4.0.4",
+    "razzle-plugin-typescript": "^4.0.4",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.3.4",
+    "webpack": "^4.44.1",
+    "webpack-dev-server": "^3.11.2"
+  }
 }
