@@ -38,7 +38,7 @@ const router: FastifyPluginCallback = (server: FastifyInstance, _opts, done) => 
           <head>
               <meta http-equiv="X-UA-Compatible" content="IE=edge" />
               <meta charset="utf-8" />
-              <title>Welcome to Razzle</title>
+              <title>Randomise-Spotify</title>
               <meta name="viewport" content="width=device-width, initial-scale=1">
               ${cssLinksFromAssets(assets.default, "client")}
           </head>

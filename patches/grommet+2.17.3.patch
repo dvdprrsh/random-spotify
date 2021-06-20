@@ -1,0 +1,61 @@
+diff --git a/node_modules/grommet/utils/index.d.ts b/node_modules/grommet/utils/index.d.ts
+index 10792c4..ca64432 100644
+--- a/node_modules/grommet/utils/index.d.ts
++++ b/node_modules/grommet/utils/index.d.ts
+@@ -6,6 +6,7 @@ declare const normalizeColor: (
+ ) => string;
+ 
+ export { normalizeColor };
++export { isObject, deepFreeze, deepMerge, removeUndefined };
+ 
+ // object.js
+ export type DeepReadonly<T extends object> = {
+@@ -37,7 +38,6 @@ declare const removeUndefined: <T extends object>(
+   obj: T,
+ ) => NonUndefinedProps<T>;
+ 
+-export { isObject, deepFreeze, deepMerge, removeUndefined };
+ 
+ /*
+  * Utility type for inferring the props type of a component.
+@@ -63,7 +63,6 @@ type TShirtSizeType =
+   | 'medium'
+   | 'large'
+   | 'xlarge'
+-  | string;
+ 
+ // Extracting types for common properties among components
+ type BoxSideType =
+@@ -99,16 +98,15 @@ type EdgeType =
+   | 'none'
+   | EdgeSizeType
+   | {
+-      bottom?: EdgeSizeType | string;
+-      end?: EdgeSizeType | string;
+-      horizontal?: EdgeSizeType | string;
+-      left?: EdgeSizeType | string;
+-      right?: EdgeSizeType | string;
+-      start?: EdgeSizeType | string;
+-      top?: EdgeSizeType | string;
+-      vertical?: EdgeSizeType | string;
++      bottom?: EdgeSizeType;
++      end?: EdgeSizeType;
++      horizontal?: EdgeSizeType;
++      left?: EdgeSizeType;
++      right?: EdgeSizeType;
++      start?: EdgeSizeType;
++      top?: EdgeSizeType;
++      vertical?: EdgeSizeType;
+     }
+-  | string;
+ 
+ export type A11yTitleType = string;
+ export type AlignContentType =
+@@ -182,7 +180,6 @@ export type ElevationType =
+   | 'medium'
+   | 'large'
+   | 'xlarge'
+-  | string;
+ export type FillType = 'horizontal' | 'vertical' | boolean;
+ export type GapType = 'none' | EdgeSizeType | string;
+ export type GraphColorsType = string[] | { dark?: string[]; light?: string[] };

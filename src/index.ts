@@ -20,7 +20,13 @@ const port = process.env.PORT || 3000;
 
 export default Fastify({
   logger: {
-    prettyPrint: true,
+    name: "server",
+    prettyPrint: {
+      translateTime: true,
+      levelFirst: true,
+      colorize: true,
+      crlf: true,
+    },
   },
 })
   .register(middiePlugin)
