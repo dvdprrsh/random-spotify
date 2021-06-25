@@ -1,12 +1,12 @@
-import { Container, Text } from "@chakra-ui/react";
+import { Box, Text } from "grommet";
 import React from "react";
 
 const Home: React.FC = () => {
   return (
-    <Container>
-      testing
+    <Box>
+      <Text>Wanting songs at random?</Text>
       <Text>Tests</Text>
-    </Container>
+    </Box>
   );
 };
 

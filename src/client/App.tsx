@@ -1,12 +1,18 @@
-import { Center, ChakraProvider, ColorModeScript, Container, Flex, Heading, Text } from "@chakra-ui/react";
+import { Footer, Grommet, Header, Heading, Main, Text } from "grommet";
 import React from "react";
 import { useRoutes } from "react-router-dom";
+import styled from "styled-components";
 import useMediaQuery from "./hooks/useMediaQuery";
 import theme from "./theme";
 import Home from "./views/Home";
 
+const MyFooter = styled(Footer)`
+  position: sticky;
+  top: 100%;
+`;
+
 const App: React.FC = () => {
-  const darkMode = useMediaQuery("(prefers-color-scheme: dark)", "dark" as const, "light" as const);
+  const themeMode = useMediaQuery("(prefers-color-scheme: dark)", "dark" as const, "light" as const);
   const element = useRoutes([
     {
       path: "/",
@@ -15,26 +21,19 @@ const App: React.FC = () => {
   ]);
 
   return (
-    <ChakraProvider theme={theme}>
-      <ColorModeScript initialColorMode={theme.config.initialColorMode} />
-      <Container as="header" maxWidth="none" padding="5" background="Background" mb="10">
-        <Flex width="full" align="center">
-          <Center flex="1">
-            <Heading fontWeight="bold" textTransform="uppercase">
-              Randomise Spotify
-            </Heading>
-          </Center>
-        </Flex>
-      </Container>
-      <Container>{element}</Container>
-      <Container as="footer" maxWidth="none" background="Background" padding="5" mt="10">
-        <Flex width="full" align="center">
-          <Center flex="1">
-            <Text colorScheme="spotify">Spotify-Randomise</Text>
-          </Center>
-        </Flex>
-      </Container>
-    </ChakraProvider>
+    <Grommet theme={theme} themeMode={themeMode} full="min">
+      <Header background="brand" pad={{ vertical: "xsmall", horizontal: "xlarge" }} margin={{ bottom: "large" }} justify="center">
+        <Heading color="contrast" margin="small" size="small">
+          Randomise Spotify
+        </Heading>
+      </Header>
+      <Main pad={{ horizontal: "xlarge" }} basis="full" fill="vertical">
+        {element}
+      </Main>
+      <MyFooter background="background-strong" pad={{ vertical: "small", horizontal: "xlarge" }} margin={{ top: "large" }} justify="center">
+        <Text size="medium">Spotify-Randomise</Text>
+      </MyFooter>
+    </Grommet>
   );
 };
 
