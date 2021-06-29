@@ -1,23 +1,23 @@
-import { extendDefaultTheme, ThemeValue } from "grommet";
+import { grommet } from "grommet";
+import { deepMerge } from "grommet/utils";
 
-const theme: Partial<ThemeValue> = {
+const myTheme = {
   name: "my theme",
   rounding: 10,
   spacing: "1.5rem",
-  defaultMode: "light",
   global: {
     colors: {
       brand: {
-        light: "#27FB6B",
+        light: "#1ED760",
         dark: "#0A2E36",
       },
       background: {
         dark: "#111111",
         light: "#FFFFFF",
       },
-      "background-strong": {
-        dark: "#000000",
-        light: "#222222",
+      "background!": {
+        light: "#111111",
+        dark: "#0A2E36",
       },
       "background-back": {
         dark: "#111111",
@@ -115,6 +115,8 @@ const theme: Partial<ThemeValue> = {
     border: {
       radius: "10px",
     },
+    primary: {},
+    secondary: {},
   },
   checkBox: {
     check: {
@@ -129,8 +131,6 @@ const theme: Partial<ThemeValue> = {
       radius: "10px",
     },
   },
-};
+} as const;
 
-extendDefaultTheme(theme);
-
-export default theme;
+export default deepMerge(grommet, myTheme);

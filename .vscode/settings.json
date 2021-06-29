@@ -1,6 +1,6 @@
 {
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "cSpell.words": ["middie", "pino"],
+  "cSpell.words": ["authcode", "middie", "pino", "refreshtoken", "thememode"],
   "files.exclude": {
     "**/.git": false,
     "**/.svn": true,

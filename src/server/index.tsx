@@ -1,18 +1,30 @@
+import App from "client/App";
+import { AuthState } from "client/context/auth.context";
 import { FastifyInstance, FastifyPluginCallback } from "fastify";
+import fastifyCookie from "fastify-cookie";
+import fastifyCors from "fastify-cors";
 import fastifySensible from "fastify-sensible";
 import fastifyStatic from "fastify-static";
-import React from "react";
 import { renderToString } from "react-dom/server";
 import { StaticRouter } from "react-router-dom/server";
+import { SpotifyController } from "services/spotify";
 import { ServerStyleSheet } from "styled-components";
-import App from "../client/App";
+import apiRouter from "./api";
 
 const cssLinksFromAssets = (assets: GenericObject, entryPoint: string) => {
-  return assets[entryPoint] ? (assets[entryPoint].css ? assets[entryPoint].css.map((asset: string) => `<link rel="stylesheet" href="${asset}">`).join("") : "") : "";
+  return assets[entryPoint]
+    ? assets[entryPoint].css
+      ? assets[entryPoint].css.map((asset: string) => `<link rel="stylesheet" href="${asset}">`).join("")
+      : ""
+    : "";
 };
 
 const jsScriptTagsFromAssets = (assets: GenericObject, entryPoint: string, extra = "") => {
-  return assets[entryPoint] ? (assets[entryPoint].js ? assets[entryPoint].js.map((asset: string) => `<script src="${asset}"${extra}></script>`).join("") : "") : "";
+  return assets[entryPoint]
+    ? assets[entryPoint].js
+      ? assets[entryPoint].js.map((asset: string) => `<script src="${asset}"${extra}></script>`).join("")
+      : ""
+    : "";
 };
 
 const router: FastifyPluginCallback = (server: FastifyInstance, _opts, done) => {
@@ -21,16 +33,52 @@ const router: FastifyPluginCallback = (server: FastifyInstance, _opts, done) => 
       root: process.env.RAZZLE_PUBLIC_DIR!,
     })
     .register(fastifySensible)
+    .register(fastifyCookie)
+    .register(fastifyCors, {
+      origin: true,
+    })
+    .setErrorHandler(function (error, _req, res) {
+      this.log.error(error);
+      res.internalServerError();
+    })
+    .register(apiRouter, { prefix: "/api" })
     .get("/", async (req, res) => {
       const assets = await import(process.env.RAZZLE_ASSETS_MANIFEST!);
       const sheets = new ServerStyleSheet();
+
+      const initialThemeMode = req.cookies._thememode as "dark" | "light" | undefined;
+      const authState = await SpotifyController.getAuthState(req.cookies);
+      const authInitState: AuthState = authState;
+
+      if (authState.authCode) {
+        res.setCookie("_authcode", authState.authCode);
+      } else {
+        res.clearCookie("_authcode");
+      }
+      if (authState.accessToken) {
+        res.setCookie("_token", authState.accessToken, { expires: authState.expiry! });
+      } else {
+        res.clearCookie("_token");
+      }
+      if (authState.expiry) {
+        res.setCookie("_exp", authState.expiry.toISOString());
+      } else {
+        res.clearCookie("_exp");
+      }
+      if (authState.refreshToken) {
+        res.setCookie("_refreshtoken", authState.refreshToken);
+      } else {
+        res.clearCookie("_refreshtoken");
+      }
+
       let styles = "";
       let markup = "";
       try {
+        globalThis.__CONFIG__ = { initialThemeMode, authInitState };
         markup = renderToString(
           sheets.collectStyles(
             <StaticRouter location={req.url}>
-              <App />
+              <App initialThemeMode={initialThemeMode} authInitState={authInitState} />
             </StaticRouter>
           )
         );
@@ -58,6 +106,7 @@ const router: FastifyPluginCallback = (server: FastifyInstance, _opts, done) => 
           <body>
               <div id="root">${markup}</div>
               ${jsScriptTagsFromAssets(assets.default, "client", " defer crossorigin")}
+              <script> window.__CONFIG__ = ${JSON.stringify({ initialThemeMode, authInitState })} </script>
           </body>
         </html>
   `

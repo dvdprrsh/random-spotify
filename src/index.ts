@@ -1,6 +1,6 @@
 import fastify from "fastify";
 import middiePlugin from "middie";
-import App from "./server";
+import App from "server";
 
 const port = process.env.PORT || 3000;
 
@@ -12,7 +12,7 @@ if (module.hot) {
     try {
       const appImport = await import("./server");
       app = appImport.default;
-      start();
+      await start();
     } catch (error) {
       console.error(error);
     }
@@ -21,16 +21,35 @@ if (module.hot) {
 }
 
 let server: ReturnType<typeof fastify>;
-const start = () => {
-  if (server) server.close();
+const start = async () => {
+  if (server) await server.close();
   server = fastify({
     logger: {
       name: "server",
+      serializers: {
+        req(req) {
+          return {
+            method: req.method,
+            url: req.url,
+            direction: "~~>",
+          };
+        },
+        res(res) {
+          return {
+            method: res.request.method,
+            url: res.request.url,
+            statusCode: res.statusCode,
+            responseTime: Math.round(res.getResponseTime() * 100) / 100 + "ms",
+            direction: "<~~",
+          };
+        },
+      },
       prettyPrint: {
         translateTime: true,
         levelFirst: true,
         colorize: true,
-        crlf: true,
+        messageFormat: "{req.direction}{res.direction} ({reqId}) [{req.method}{res.method}] {req.url}{res.url} {res.statusCode} {res.responseTime}",
+        ignore: "reqId,req,res,responseTime",
       },
     },
   });

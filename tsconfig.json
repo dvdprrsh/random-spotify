@@ -6,6 +6,17 @@
     "strict": true,
     "jsx": "react-jsx",
     "esModuleInterop": true,
+    "baseUrl": "./src",
+    "paths": {
+      "apis/*": ["client/api/*", "server/api/*"],
+      "client/*": ["client/*"],
+      "components/*": ["client/components/*"],
+      "contexts/*": ["client/context/*"],
+      "hooks/*": ["client/hooks/*"],
+      "views/*": ["client/views/*"],
+      "server/*": ["server/*"],
+      "services/*": ["server/services/*"]
+    },
     "typeRoots": ["./node_modules/@types", "./typings"]
   }
 }

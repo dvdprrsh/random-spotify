@@ -1,18 +1,29 @@
-import { Footer, Grommet, Header, Heading, Main, Text } from "grommet";
-import React from "react";
+import Footer from "components/Footer.component";
+import Header from "components/Header.component";
+import useAuthContext, { AuthState } from "contexts/auth.context";
+import { Grommet, Main, ThemeMode } from "grommet";
+import Cookies from "js-cookie";
+import React, { useCallback, useEffect, useState } from "react";
+import { useMediaQuery } from "react-responsive";
 import { useRoutes } from "react-router-dom";
 import styled from "styled-components";
-import useMediaQuery from "./hooks/useMediaQuery";
-import theme from "./theme";
-import Home from "./views/Home";
+import Home from "views/Home";
+import myTheme from "./theme";
 
-const MyFooter = styled(Footer)`
-  position: sticky;
-  top: 100%;
+interface Props {
+  initialThemeMode: "dark" | "light" | undefined;
+  authInitState: AuthState;
+}
+
+const MyGrommet = styled(Grommet)`
+  display: flex;
+  flex-flow: column;
 `;
 
-const App: React.FC = () => {
-  const themeMode = useMediaQuery("(prefers-color-scheme: dark)", "dark" as const, "light" as const);
+const App: React.FC<Props> = ({ initialThemeMode, authInitState }: Props) => {
+  const prefersDarkMode = useMediaQuery({ query: "(prefers-color-scheme: dark)" });
+  const [, actions] = useAuthContext();
+  const [themeMode, setThemeMode] = useState<ThemeMode>(initialThemeMode);
   const element = useRoutes([
     {
       path: "/",
@@ -20,20 +31,28 @@ const App: React.FC = () => {
     },
   ]);
 
+  const handleThemeModeChange = useCallback((tm: { themeMode: ThemeMode } | null) => setThemeMode(tm?.themeMode), []);
+
+  useEffect(() => {
+    if (!themeMode) setThemeMode(prefersDarkMode ? "dark" : "light");
+  }, [prefersDarkMode, themeMode]);
+
+  useEffect(() => {
+    if (themeMode) Cookies.set("_thememode", themeMode);
+  }, [themeMode]);
+
+  useEffect(() => {
+    actions.setState(authInitState);
+  }, [actions, authInitState]);
+
   return (
-    <Grommet theme={theme} themeMode={themeMode} full="min">
-      <Header background="brand" pad={{ vertical: "xsmall", horizontal: "xlarge" }} margin={{ bottom: "large" }} justify="center">
-        <Heading color="contrast" margin="small" size="small">
-          Randomise Spotify
-        </Heading>
-      </Header>
-      <Main pad={{ horizontal: "xlarge" }} basis="full" fill="vertical">
+    <MyGrommet theme={myTheme} themeMode={themeMode} full="min">
+      <Header ref={handleThemeModeChange} initialThemeMode={initialThemeMode} />
+      <Main margin={{ horizontal: "xlarge" }} pad={{ horizontal: "xlarge", vertical: "small" }} basis="full" fill="vertical" animation="fadeIn">
         {element}
       </Main>
-      <MyFooter background="background-strong" pad={{ vertical: "small", horizontal: "xlarge" }} margin={{ top: "large" }} justify="center">
-        <Text size="medium">Spotify-Randomise</Text>
-      </MyFooter>
-    </Grommet>
+      <Footer />
+    </MyGrommet>
   );
 };
 
