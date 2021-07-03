@@ -1,4 +1,4 @@
-import { AuthState } from "contexts/auth.context";
+import { BaseAuthState } from "client/atoms/auth.atom";
 import { DateTime } from "luxon";
 import { ORIGIN, SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_WEB_PLAYBACK_SCOPES } from "server/config";
 import SpotifyWebApi, { RefreshAccessTokenResponse } from "spotify-web-api-node";
@@ -33,13 +33,12 @@ export const getAuthState = async (cookies: {
   _token?: string;
   _exp?: string;
   _refreshtoken?: string;
-}): Promise<AuthState & { authCode: string | null; expiry: Date | null }> => {
-  console.log(DateTime.fromISO(cookies._exp!).diffNow("minutes").minutes);
+}): Promise<(Omit<BaseAuthState, "expiry"> & { expiry: Date | null }) | null> => {
   try {
     if (cookies._token && cookies._refreshtoken && cookies._exp && DateTime.fromISO(cookies._exp).diffNow("minutes", {}).minutes < 10) {
       const res = await refreshAccessToken(cookies._token, cookies._refreshtoken);
       return {
-        authCode: cookies._authcode ?? null,
+        authCode: cookies._authcode!,
         accessToken: res.access_token,
         refreshToken: res.refresh_token ?? null,
         expiry: typeof res.expires_in === "number" ? DateTime.utc().plus({ seconds: res.expires_in! }).toJSDate() : null,
@@ -47,7 +46,7 @@ export const getAuthState = async (cookies: {
     }
     if (cookies._token) {
       return {
-        authCode: cookies._authcode ?? null,
+        authCode: cookies._authcode!,
         accessToken: cookies._token,
         refreshToken: cookies._refreshtoken ?? null,
         expiry: cookies._exp ? DateTime.fromISO(cookies._exp).toJSDate() : null,
@@ -56,16 +55,16 @@ export const getAuthState = async (cookies: {
     if (cookies._authcode) {
       const res = await getAccessToken(cookies._authcode);
       return {
-        authCode: cookies._authcode ?? null,
+        authCode: cookies._authcode!,
         accessToken: res.access_token,
         refreshToken: res.refresh_token,
         expiry: typeof res.expires_in === "number" ? DateTime.utc().plus({ seconds: res.expires_in }).toJSDate() : null,
       };
     }
-    return { authCode: null, accessToken: null, refreshToken: null, expiry: null };
+    return null;
   } catch (error) {
     console.error(error);
-    return { authCode: null, accessToken: null, refreshToken: null, expiry: null };
+    return null;
   } finally {
     spotify.resetAccessToken();
     spotify.resetRefreshToken();

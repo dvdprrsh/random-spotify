@@ -277,11 +277,13 @@ index 5ed6aa6..35ada76 100644
 +export { grommet } from "./grommet";
 +export type ThemeMode = "dark" | "light" | undefined;
 diff --git a/node_modules/grommet/utils/index.d.ts b/node_modules/grommet/utils/index.d.ts
-index 10792c4..9d229de 100644
+index 10792c4..cc81fe3 100644
 --- a/node_modules/grommet/utils/index.d.ts
 +++ b/node_modules/grommet/utils/index.d.ts
-@@ -1,11 +1,10 @@
-+import { LiteralUnion } from "prettier";
+@@ -1,11 +1,12 @@
++/// <reference types="type-fest" />
++
++import { LiteralUnion } from "type-fest";
 +
  // colors.js
 -declare const normalizeColor: (
@@ -296,7 +298,7 @@ index 10792c4..9d229de 100644
  
  // object.js
  export type DeepReadonly<T extends object> = {
-@@ -21,23 +20,16 @@ export type DeepFreeze = <T extends object>(obj: T) => DeepReadonly<T>;
+@@ -21,23 +22,16 @@ export type DeepFreeze = <T extends object>(obj: T) => DeepReadonly<T>;
  // overload because generic variadic solution has messy result and all/most mergings are binary
  export interface DeepMerge {
    <T extends object, S extends object>(target: T, source: S): T & S;
@@ -323,7 +325,7 @@ index 10792c4..9d229de 100644
  
  /*
   * Utility type for inferring the props type of a component.
-@@ -50,75 +42,33 @@ export { isObject, deepFreeze, deepMerge, removeUndefined };
+@@ -50,75 +44,33 @@ export { isObject, deepFreeze, deepMerge, removeUndefined };
   * type SomeComponentProps = PropsOf<typeof SomeComponent>;
   * ```
   */
@@ -375,7 +377,7 @@ index 10792c4..9d229de 100644
 -  | 'large'
 -  | 'xlarge';
 +type BoxSideType = "top" | "left" | "bottom" | "right" | "start" | "end" | "horizontal" | "vertical" | "all" | "between";
-+type BoxSizeType = "xsmall" | "small" | "medium" | "large" | "xlarge" | string;
++type BoxSizeType = LiteralUnion<"xsmall" | "small" | "medium" | "large" | "xlarge", string>;
 +type BoxStyleType = "solid" | "dashed" | "dotted" | "double" | "groove" | "ridge" | "inset" | "outset" | "hidden";
 +export type EdgeSizeType = LiteralUnion<"xxsmall" | "xsmall" | "small" | "medium" | "large" | "xlarge", string>;
  type EdgeType =
@@ -417,7 +419,7 @@ index 10792c4..9d229de 100644
  export type AnimateType = boolean;
  export type BackgroundType =
    | string
-@@ -127,28 +77,15 @@ export type BackgroundType =
+@@ -127,28 +79,15 @@ export type BackgroundType =
        dark?: boolean | string;
        image?: string;
        position?: string;
@@ -453,7 +455,7 @@ index 10792c4..9d229de 100644
  export type BorderType =
    | boolean
    | BoxSideType
-@@ -169,75 +106,33 @@ export type BorderType =
+@@ -169,75 +108,27 @@ export type BorderType =
        style?: BoxStyleType;
      }[];
  export type ColorType = string | { dark?: string; light?: string } | undefined;
@@ -476,7 +478,7 @@ index 10792c4..9d229de 100644
 +export type DirectionType = "row" | "column" | "row-responsive" | "row-reverse" | "column-reverse";
 +export type ElevationType = "none" | "xsmall" | "small" | "medium" | "large" | "xlarge";
 +export type FillType = "horizontal" | "vertical" | boolean;
-+export type GapType = "none" | EdgeSizeType | string;
++export type GapType = LiteralUnion<"none" | EdgeSizeType, string>;
  export type GraphColorsType = string[] | { dark?: string[]; light?: string[] };
  export type GridAreaType = string;
 -export type JustifyContentType =
@@ -497,7 +499,7 @@ index 10792c4..9d229de 100644
 -  | true
 -  | false
 -  | number;
-+export type OpacityType = "weak" | "medium" | "strong" | string | true | false | number;
++export type OpacityType = LiteralUnion<"weak" | "medium" | "strong", string> | true | false | number;
  export type PadType = EdgeType;
  export type PlaceHolderType = string | JSX.Element | React.ReactNode;
  export type RoundType =
@@ -508,13 +510,8 @@ index 10792c4..9d229de 100644
 -  | 'large'
 -  | 'xlarge'
 -  | 'full'
-+  | "xsmall"
-+  | "small"
-+  | "medium"
-+  | "large"
-+  | "xlarge"
-+  | "full"
-   | string
+-  | string
++  | LiteralUnion<"xsmall" | "small" | "medium" | "large" | "xlarge" | "full", string>
    | {
 -      corner?:
 -        | 'top'
@@ -527,7 +524,7 @@ index 10792c4..9d229de 100644
 -        | 'bottom-right';
 -      size?: 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge' | string;
 +      corner?: "top" | "left" | "bottom" | "right" | "top-left" | "top-right" | "bottom-left" | "bottom-right";
-+      size?: "xsmall" | "small" | "medium" | "large" | "xlarge" | string;
++      size?: LiteralUnion<"xsmall" | "small" | "medium" | "large" | "xlarge", string>;
      };
 -export type TextAlignType = 'start' | 'center' | 'end';
 -export type ThicknessType =
@@ -541,11 +538,11 @@ index 10792c4..9d229de 100644
 -  | string
 -  | number;
 +export type TextAlignType = "start" | "center" | "end";
-+export type ThicknessType = "hair" | "xsmall" | "small" | "medium" | "large" | "xlarge" | "none" | string | number;
++export type ThicknessType = LiteralUnion<"hair" | "xsmall" | "small" | "medium" | "large" | "xlarge" | "none", string> | number;
  
  declare const breakpointEdgeSize: {
    none?: string;
-@@ -272,23 +167,23 @@ declare const breakpointSize: {
+@@ -272,23 +163,23 @@ declare const breakpointSize: {
  export type BreakpointSize = typeof breakpointSize;
  
  export type HeightType =

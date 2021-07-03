@@ -1,8 +1,11 @@
+import authState from "client/atoms/auth.atom";
+import spotifyAtom from "client/atoms/spotify.atom";
 import useSpotify from "client/hooks/useSpotify.hook";
 import { Box, Button, Header as GrommetHeader, Heading, Nav, Text, ThemeMode } from "grommet";
-import { Moon, Sun } from "grommet-icons";
+import { Logout, Moon, Sun } from "grommet-icons";
 import { forwardRef, ForwardRefRenderFunction, MouseEventHandler, useCallback, useEffect, useImperativeHandle, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useRecoilValue, useResetRecoilState } from "recoil";
 import styled from "styled-components";
 
 interface Props {
@@ -32,8 +35,11 @@ const Marquee = styled(Text)`
 const Header: ForwardRefRenderFunction<{ themeMode: ThemeMode }, Props> = ({ initialThemeMode }: Props, ref) => {
   const navigate = useNavigate();
   const spotify = useSpotify();
+  const auth = useRecoilValue(authState);
+  const resetAuth = useResetRecoilState(authState);
+  const resetSpotify = useResetRecoilState(spotifyAtom);
   const [themeMode, setThemeMode] = useState<ThemeMode>(initialThemeMode);
-  const [currentlyPlaying, setCurrentlyPlaying] = useState<SpotifyApi.CurrentPlaybackResponse>();
+  const [currentlyPlaying, setCurrentlyPlaying] = useState<SpotifyApi.CurrentPlaybackResponse | null>(null);
   useImperativeHandle(
     ref,
     () => ({
@@ -53,14 +59,20 @@ const Header: ForwardRefRenderFunction<{ themeMode: ThemeMode }, Props> = ({ ini
   );
 
   const handleCurrentlyPlaying = useCallback(async () => {
-    if (!spotify) return;
+    if (!spotify) return setCurrentlyPlaying(null);
     const res = await spotify.getMyCurrentPlaybackState();
     setCurrentlyPlaying(res);
     if (res.item && res.progress_ms) setTimeout(handleCurrentlyPlaying, res.item.duration_ms - res.progress_ms);
   }, [spotify]);
 
+  const handleLogout = useCallback(() => {
+    resetAuth();
+    resetSpotify();
+    setCurrentlyPlaying(null);
+  }, [resetAuth, resetSpotify]);
+
   useEffect(() => {
-    if (spotify) handleCurrentlyPlaying();
+    handleCurrentlyPlaying();
   }, [handleCurrentlyPlaying, spotify]);
 
   return (
@@ -92,12 +104,16 @@ const Header: ForwardRefRenderFunction<{ themeMode: ThemeMode }, Props> = ({ ini
           <Heading size="small">Randomise Spotify</Heading>
         </Button>
       </Box>
-      <Nav flex align="end">
+      <Nav flex direction="row" justify="end" gap="small">
         <Button
           onClick={handleThemeModeSwitch}
-          icon={themeMode === "light" ? <Sun color="brand-secondary" /> : <Moon color="brand-secondary" />}
+          icon={themeMode === "light" ? <Sun color="brand-secondary" size="medium" /> : <Moon color="brand-secondary" size="medium" />}
           a11yTitle="Toggle dark mode"
+          tip="Toggle dark mode"
+          size="small"
+          hoverIndicator
         />
+        {auth && <Button onClick={handleLogout} icon={<Logout color="brand-secondary" />} a11yTitle="Logout" tip="Logout" hoverIndicator />}
       </Nav>
     </GrommetHeader>
   );

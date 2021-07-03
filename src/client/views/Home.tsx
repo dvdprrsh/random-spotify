@@ -1,19 +1,20 @@
 import { AuthenticationAPI } from "apis/public/authentication.api";
 import { SpotifyAPI } from "apis/spotify.api";
-import useAuthContext from "contexts/auth.context";
+import authState from "client/atoms/auth.atom";
 import { Box, Button, Text } from "grommet";
 import { Spotify as SpotifyIcon } from "grommet-icons";
 import useQuery from "hooks/useQuery.hook";
 import useSpotify from "hooks/useSpotify.hook";
-import Cookies from "js-cookie";
 import { DateTime } from "luxon";
 import React, { useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useRecoilState, useResetRecoilState } from "recoil";
 
 const Home: React.FC = () => {
+  const [auth, setAuth] = useRecoilState(authState);
+  const resetAuth = useResetRecoilState(authState);
+  useSpotify(auth?.accessToken);
   const parsed = useQuery<{ code?: string }>();
-  const [state, actions] = useAuthContext();
-  useSpotify(state.accessToken);
   const navigate = useNavigate();
 
   const handleLogin = useCallback(async () => {
@@ -24,24 +25,23 @@ const Home: React.FC = () => {
   useEffect(() => {
     (async () => {
       if (!parsed.code) return;
-      Cookies.set("_authcode", parsed.code);
       const res = await SpotifyAPI.getAccessToken(parsed.code);
       if (res) {
-        Cookies.set("_token", res.access_token, { expires: DateTime.utc().plus({ seconds: res.expires_in }).toJSDate() });
-        Cookies.set("_refreshtoken", res.refresh_token);
-        Cookies.set("_exp", DateTime.utc().plus({ seconds: res.expires_in }).toISO());
-        actions.setState({ accessToken: res.access_token, refreshToken: res.refresh_token });
+        const expiry = DateTime.utc().plus({ seconds: res.expires_in }).toISO();
+        setAuth({ authCode: parsed.code, accessToken: res.access_token, refreshToken: res.refresh_token, expiry });
         navigate("./", { replace: true });
+        return;
       }
+      resetAuth();
     })();
-  }, [actions, navigate, parsed.code]);
+  }, [navigate, parsed.code, resetAuth, setAuth]);
 
   return (
     <Box flex>
       <Text size="large" margin={{ bottom: "medium" }}>
         Login To Start Randomising
       </Text>
-      {!state.accessToken && <Button onClick={handleLogin} color="brand" icon={<SpotifyIcon color="brand" />} label="Login with Spotify" />}
+      {!auth?.accessToken && <Button onClick={handleLogin} color="brand" icon={<SpotifyIcon color="brand" />} label="Login with Spotify" />}
     </Box>
   );
 };

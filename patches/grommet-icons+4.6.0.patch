@@ -1,0 +1,22 @@
+diff --git a/node_modules/grommet-icons/icons/index.d.ts b/node_modules/grommet-icons/icons/index.d.ts
+index dfa0b58..5235150 100644
+--- a/node_modules/grommet-icons/icons/index.d.ts
++++ b/node_modules/grommet-icons/icons/index.d.ts
+@@ -1,12 +1,15 @@
++/// <reference types="type-fest" />
++
+ import * as React from "react";
++import { LiteralUnion } from "type-fest";
+ 
+ export interface IconProps {
+   a11yTitle?: string;
+   color?: string;
+-  size?: "small" | "medium" | "large" | "xlarge" | string;
++  size?: LiteralUnion<"small" | "medium" | "large" | "xlarge", string>;
+ }
+ 
+-export type Icon = React.ComponentType<IconProps & JSX.IntrinsicElements['svg']>;
++export type Icon = React.ComponentType<IconProps & JSX.IntrinsicElements["svg"]>;
+ 
+ export declare const Accessibility: Icon;
+ export declare const Achievement: Icon;

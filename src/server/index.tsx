@@ -1,5 +1,5 @@
 import App from "client/App";
-import { AuthState } from "client/context/auth.context";
+import { AuthState } from "client/atoms/auth.atom";
 import { FastifyInstance, FastifyPluginCallback } from "fastify";
 import fastifyCookie from "fastify-cookie";
 import fastifyCors from "fastify-cors";
@@ -48,24 +48,24 @@ const router: FastifyPluginCallback = (server: FastifyInstance, _opts, done) => 
 
       const initialThemeMode = req.cookies._thememode as "dark" | "light" | undefined;
       const authState = await SpotifyController.getAuthState(req.cookies);
-      const authInitState: AuthState = authState;
+      const authInitState: AuthState = authState && { ...authState, expiry: authState?.expiry?.toISOString() ?? null };
 
-      if (authState.authCode) {
+      if (authState?.authCode) {
         res.setCookie("_authcode", authState.authCode);
       } else {
         res.clearCookie("_authcode");
       }
-      if (authState.accessToken) {
+      if (authState?.accessToken) {
         res.setCookie("_token", authState.accessToken, { expires: authState.expiry! });
       } else {
         res.clearCookie("_token");
       }
-      if (authState.expiry) {
+      if (authState?.expiry) {
         res.setCookie("_exp", authState.expiry.toISOString());
       } else {
         res.clearCookie("_exp");
       }
-      if (authState.refreshToken) {
+      if (authState?.refreshToken) {
         res.setCookie("_refreshtoken", authState.refreshToken);
       } else {
         res.clearCookie("_refreshtoken");
