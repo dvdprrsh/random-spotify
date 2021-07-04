@@ -1,18 +1,20 @@
+import authState from "client/atoms/auth.atom";
 import spotifyAtom from "client/atoms/spotify.atom";
 import { useEffect } from "react";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import SpotifyWebApi from "spotify-web-api-js";
 
-const useSpotify = (accessToken?: string | null): SpotifyWebApi.SpotifyWebApiJs | null => {
+const useSpotify = (): SpotifyWebApi.SpotifyWebApiJs | null => {
+  const auth = useRecoilValue(authState);
   const [spotify, setSpotify] = useRecoilState(spotifyAtom);
 
   useEffect(() => {
-    if (!spotify && accessToken) {
+    if (!spotify && auth?.accessToken) {
       const Spotify = new SpotifyWebApi();
-      Spotify.setAccessToken(accessToken);
+      Spotify.setAccessToken(auth?.accessToken);
       setSpotify(Spotify);
     }
-  }, [accessToken, setSpotify, spotify]);
+  }, [auth?.accessToken, setSpotify, spotify]);
 
   return spotify;
 };

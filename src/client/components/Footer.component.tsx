@@ -4,22 +4,18 @@ import styled from "styled-components";
 
 interface Props {}
 
-const MyFooter = styled(GrommetFooter)`
+const FooterContainer = styled(GrommetFooter)`
   position: sticky;
   top: 100%;
 `;
 
 const Footer: FC<Props> = () => {
   return (
-    <MyFooter
-      background="background!"
-      pad={{ vertical: "small", horizontal: "xlarge" }}
-      margin={{ top: "large" }}
-      justify="center"
-      animation="fadeIn"
-    >
-      <Text size="medium">Spotify-Randomise</Text>
-    </MyFooter>
+    <FooterContainer flex="shrink" align="center" justify="center" fill="horizontal" pad="small" margin={{ top: "large" }} background="background!">
+      <GrommetFooter width={{ width: "100%", max: "xlarge" }} justify="center" animation="fadeIn">
+        <Text size="medium">Spotify-Randomise</Text>
+      </GrommetFooter>
+    </FooterContainer>
   );
 };
 

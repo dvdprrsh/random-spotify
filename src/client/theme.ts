@@ -2,7 +2,7 @@ import { grommet } from "grommet";
 import { deepMerge } from "grommet/utils";
 
 const myTheme = {
-  name: "my theme",
+  name: "spotify-randomise-theme",
   rounding: 10,
   spacing: "1.5rem",
   global: {

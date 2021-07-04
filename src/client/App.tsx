@@ -4,13 +4,12 @@ import { Grommet, Main, ThemeMode } from "grommet";
 import Cookies from "js-cookie";
 import React, { useCallback, useEffect, useState } from "react";
 import { useMediaQuery } from "react-responsive";
-import { useRoutes } from "react-router-dom";
 import { InitializeState, RecoilRoot } from "recoil";
 import styled from "styled-components";
-import Home from "views/Home";
 import authState, { AuthState } from "./atoms/auth.atom";
 import RecoilDebug from "./components/RecoilDebug.component";
 import myTheme from "./theme";
+import Router from "./views/Router.view";
 
 interface Props {
   initialThemeMode: "dark" | "light" | undefined;
@@ -20,17 +19,12 @@ interface Props {
 const MyGrommet = styled(Grommet)`
   display: flex;
   flex-flow: column;
+  align-items: center;
 `;
 
 const App: React.FC<Props> = ({ initialThemeMode, authInitState }: Props) => {
   const prefersDarkMode = useMediaQuery({ query: "(prefers-color-scheme: dark)" });
   const [themeMode, setThemeMode] = useState<ThemeMode>(initialThemeMode);
-  const element = useRoutes([
-    {
-      path: "/",
-      element: <Home />,
-    },
-  ]);
 
   const handleThemeModeChange = useCallback((tm: { themeMode: ThemeMode } | null) => setThemeMode(tm?.themeMode), []);
 
@@ -49,8 +43,8 @@ const App: React.FC<Props> = ({ initialThemeMode, authInitState }: Props) => {
       <RecoilDebug />
       <MyGrommet theme={myTheme} themeMode={themeMode} full="min">
         <Header ref={handleThemeModeChange} initialThemeMode={initialThemeMode} />
-        <Main margin={{ horizontal: "xlarge" }} pad={{ horizontal: "xlarge", vertical: "small" }} basis="full" fill="vertical" animation="fadeIn">
-          {element}
+        <Main width={{ width: "100%", max: "xlarge" }} pad={{ horizontal: "small" }} fill="vertical" animation="fadeIn">
+          <Router />
         </Main>
         <Footer />
       </MyGrommet>

@@ -13,7 +13,7 @@ import { useRecoilState, useResetRecoilState } from "recoil";
 const Home: React.FC = () => {
   const [auth, setAuth] = useRecoilState(authState);
   const resetAuth = useResetRecoilState(authState);
-  useSpotify(auth?.accessToken);
+  useSpotify();
   const parsed = useQuery<{ code?: string }>();
   const navigate = useNavigate();
 
@@ -29,7 +29,7 @@ const Home: React.FC = () => {
       if (res) {
         const expiry = DateTime.utc().plus({ seconds: res.expires_in }).toISO();
         setAuth({ authCode: parsed.code, accessToken: res.access_token, refreshToken: res.refresh_token, expiry });
-        navigate("./", { replace: true });
+        navigate("./dashboard", { replace: true });
         return;
       }
       resetAuth();

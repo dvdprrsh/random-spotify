@@ -1,29 +1,9 @@
 import fastify from "fastify";
-import middiePlugin from "middie";
-import App from "server";
 
 const port = process.env.PORT || 3000;
 
-let app = App;
-
-if (module.hot) {
-  module.hot.accept("./server", async function () {
-    console.log("🔁  HMR Reloading `./server`...");
-    try {
-      const appImport = await import("./server");
-      app = appImport.default;
-      await start();
-    } catch (error) {
-      console.error(error);
-    }
-  });
-  console.info("✅  Server-side HMR Enabled!");
-}
-
-let server: ReturnType<typeof fastify>;
-const start = async () => {
-  if (server) await server.close();
-  server = fastify({
+const start = () => {
+  fastify({
     logger: {
       name: "server",
       serializers: {
@@ -52,17 +32,25 @@ const start = async () => {
         ignore: "reqId,req,res,responseTime",
       },
     },
-  });
-  server
-    .register(middiePlugin)
-    .register(app)
+  })
+    .register(import("server"))
     .listen(port, function (err) {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      console.log(`✅ Started on port ${port}`);
+      if (err) console.error(err);
+      else console.log(`✅ Started on port ${port}`);
     });
 };
 
 start();
+
+if (module.hot) {
+  module.hot.accept("./server", function () {
+    console.log("🔁  HMR Reloading `./server`...");
+    try {
+      console.log("here");
+      start();
+    } catch (error) {
+      console.error(error);
+    }
+  });
+  console.info("✅  Server-side HMR Enabled!");
+}

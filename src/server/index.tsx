@@ -1,15 +1,10 @@
 import App from "client/App";
 import { AuthState } from "client/atoms/auth.atom";
 import { FastifyInstance, FastifyPluginCallback } from "fastify";
-import fastifyCookie from "fastify-cookie";
-import fastifyCors from "fastify-cors";
-import fastifySensible from "fastify-sensible";
-import fastifyStatic from "fastify-static";
 import { renderToString } from "react-dom/server";
 import { StaticRouter } from "react-router-dom/server";
 import { SpotifyController } from "services/spotify";
 import { ServerStyleSheet } from "styled-components";
-import apiRouter from "./api";
 
 const cssLinksFromAssets = (assets: GenericObject, entryPoint: string) => {
   return assets[entryPoint]
@@ -29,20 +24,12 @@ const jsScriptTagsFromAssets = (assets: GenericObject, entryPoint: string, extra
 
 const router: FastifyPluginCallback = (server: FastifyInstance, _opts, done) => {
   server
-    .register(fastifyStatic, {
-      root: process.env.RAZZLE_PUBLIC_DIR!,
-    })
-    .register(fastifySensible)
-    .register(fastifyCookie)
-    .register(fastifyCors, {
-      origin: true,
-    })
-    .setErrorHandler(function (error, _req, res) {
-      this.log.error(error);
-      res.internalServerError();
-    })
-    .register(apiRouter, { prefix: "/api" })
-    .get("/", async (req, res) => {
+    .register(import("fastify-static"), { root: process.env.RAZZLE_PUBLIC_DIR!, wildcard: false })
+    .register(import("fastify-sensible"))
+    .register(import("fastify-cookie"))
+    .register(import("fastify-cors"), { origin: true })
+    .register(import("./api"), { prefix: "/api" })
+    .all("/*", async (req, res) => {
       const assets = await import(process.env.RAZZLE_ASSETS_MANIFEST!);
       const sheets = new ServerStyleSheet();
 
@@ -85,6 +72,7 @@ const router: FastifyPluginCallback = (server: FastifyInstance, _opts, done) => 
         styles = sheets.getStyleTags();
       } catch (error) {
         req.log.error(error);
+        if (error.name === "SSR_REDIRECT") return res.redirect(error.message);
       } finally {
         sheets.seal();
       }

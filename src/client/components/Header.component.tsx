@@ -3,7 +3,7 @@ import spotifyAtom from "client/atoms/spotify.atom";
 import useSpotify from "client/hooks/useSpotify.hook";
 import { Box, Button, Header as GrommetHeader, Heading, Nav, Text, ThemeMode } from "grommet";
 import { Logout, Moon, Sun } from "grommet-icons";
-import { forwardRef, ForwardRefRenderFunction, MouseEventHandler, useCallback, useEffect, useImperativeHandle, useState } from "react";
+import { forwardRef, ForwardRefRenderFunction, MouseEventHandler, useCallback, useEffect, useImperativeHandle, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilValue, useResetRecoilState } from "recoil";
 import styled from "styled-components";
@@ -40,6 +40,9 @@ const Header: ForwardRefRenderFunction<{ themeMode: ThemeMode }, Props> = ({ ini
   const resetSpotify = useResetRecoilState(spotifyAtom);
   const [themeMode, setThemeMode] = useState<ThemeMode>(initialThemeMode);
   const [currentlyPlaying, setCurrentlyPlaying] = useState<SpotifyApi.CurrentPlaybackResponse | null>(null);
+
+  const lightMode = useMemo(() => themeMode === "light", [themeMode]);
+
   useImperativeHandle(
     ref,
     () => ({
@@ -62,7 +65,6 @@ const Header: ForwardRefRenderFunction<{ themeMode: ThemeMode }, Props> = ({ ini
     if (!spotify) return setCurrentlyPlaying(null);
     const res = await spotify.getMyCurrentPlaybackState();
     setCurrentlyPlaying(res);
-    if (res.item && res.progress_ms) setTimeout(handleCurrentlyPlaying, res.item.duration_ms - res.progress_ms);
   }, [spotify]);
 
   const handleLogout = useCallback(() => {
@@ -75,47 +77,60 @@ const Header: ForwardRefRenderFunction<{ themeMode: ThemeMode }, Props> = ({ ini
     handleCurrentlyPlaying();
   }, [handleCurrentlyPlaying, spotify]);
 
-  return (
-    <GrommetHeader
-      background="brand"
-      pad={{ vertical: "xsmall", horizontal: "xlarge" }}
-      margin={{ bottom: "large" }}
-      justify="center"
-      animation="fadeIn"
-    >
-      <Box flex align="center">
-        {currentlyPlaying && (
-          <Box width="100%" flex direction="row" justify="center" animation="fadeIn">
-            <Text size="small" margin={{ right: "0.5em" }}>
-              Now&nbsp;Playing:
-            </Text>
-            <Marquee size="small">
-              <Text size="small">
-                <strong>{currentlyPlaying.item?.name}</strong> by{" "}
-                <strong>{currentlyPlaying.item?.artists.map((artist) => artist.name).join(", ")}</strong>
-              </Text>
-            </Marquee>
-          </Box>
-        )}
-      </Box>
+  useEffect(() => {
+    if (currentlyPlaying?.item && currentlyPlaying.progress_ms) {
+      const timeout = setTimeout(handleCurrentlyPlaying, currentlyPlaying.item.duration_ms - currentlyPlaying.progress_ms + 1000);
+      return () => clearTimeout(timeout);
+    }
+  }, [currentlyPlaying, handleCurrentlyPlaying]);
 
-      <Box flex align="center">
-        <Button onClick={handleTitleClick} href="/" size="large">
-          <Heading size="small">Randomise Spotify</Heading>
-        </Button>
-      </Box>
-      <Nav flex direction="row" justify="end" gap="small">
-        <Button
-          onClick={handleThemeModeSwitch}
-          icon={themeMode === "light" ? <Sun color="brand-secondary" size="medium" /> : <Moon color="brand-secondary" size="medium" />}
-          a11yTitle="Toggle dark mode"
-          tip="Toggle dark mode"
-          size="small"
-          hoverIndicator
-        />
-        {auth && <Button onClick={handleLogout} icon={<Logout color="brand-secondary" />} a11yTitle="Logout" tip="Logout" hoverIndicator />}
-      </Nav>
-    </GrommetHeader>
+  return (
+    <Box
+      flex="shrink"
+      align="center"
+      justify="center"
+      fill="horizontal"
+      pad={{ horizontal: "small" }}
+      margin={{ bottom: "large" }}
+      background="brand"
+    >
+      <GrommetHeader width={{ width: "100%", max: "xlarge" }} justify="center" animation="fadeIn">
+        <Box flex align="center">
+          {currentlyPlaying && (
+            <Box width="100%" flex direction="row" justify="center" animation="fadeIn">
+              <Text size="small" margin={{ right: "0.5em" }}>
+                Now&nbsp;Playing:
+              </Text>
+              <Marquee size="small">
+                <Text size="small">
+                  <strong>{currentlyPlaying.item?.name}</strong> by{" "}
+                  <strong>
+                    {(currentlyPlaying.item as SpotifyApi.TrackObjectFull | undefined)?.artists.map((artist) => artist.name).join(", ")}
+                  </strong>
+                </Text>
+              </Marquee>
+            </Box>
+          )}
+        </Box>
+
+        <Box flex align="center">
+          <Button onClick={handleTitleClick} href="/" size="large">
+            <Heading size="small">Randomise Spotify</Heading>
+          </Button>
+        </Box>
+        <Nav flex direction="row" justify="end" gap="small">
+          <Button
+            onClick={handleThemeModeSwitch}
+            icon={lightMode ? <Sun color="brand-secondary" size="medium" /> : <Moon color="brand-secondary" size="medium" />}
+            a11yTitle={`Toggle ${lightMode ? "dark" : "light"} mode`}
+            tip={`Toggle ${lightMode ? "dark" : "light"} mode`}
+            size="small"
+            hoverIndicator
+          />
+          {auth && <Button onClick={handleLogout} icon={<Logout color="brand-secondary" />} a11yTitle="Logout" tip="Logout" hoverIndicator />}
+        </Nav>
+      </GrommetHeader>
+    </Box>
   );
 };
 

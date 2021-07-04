@@ -26,11 +26,6 @@
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/no-unused-vars": ["warn", { "ignoreRestSiblings": true }],
     "react/react-in-jsx-scope": "off",
-    "react-hooks/exhaustive-deps": [
-      "warn",
-      {
-        "additionalHooks": "useRecoilCallback"
-      }
-    ]
+    "react-hooks/exhaustive-deps": ["warn", { "additionalHooks": "useRecoilCallback" }]
   }
 }
